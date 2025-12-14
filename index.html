@@ -2,14 +2,16 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Lessons Learned</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <link rel="icon" type="image/png" href="icon.png">
-    <link rel="apple-touch-icon" href="icon.png">
-    
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='background:%23566a89'%3E%3Crect width='512' height='512' fill='%23566a89' rx='100'/%3E%3Cpath d='M360 140H152c-22.09 0-40 17.91-40 40v216c0 13.26 10.75 24 24 24h240c13.25 0 24-10.74 24-24V164C400 150.7 382.1 140 360 140z' fill='%23fff'/%3E%3Cpath d='M152 180h208v24H152zM152 230h208v24H152zM152 280h140v24H152z' fill='%23566a89' opacity='0.7'/%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='background:%23566a89'%3E%3Crect width='512' height='512' fill='%23566a89' rx='100'/%3E%3Cpath d='M360 140H152c-22.09 0-40 17.91-40 40v216c0 13.26 10.75 24 24 24h240c13.25 0 24-10.74 24-24V164C400 150.7 382.1 140 360 140z' fill='%23fff'/%3E%3Cpath d='M152 180h208v24H152zM152 230h208v24H152zM152 280h140v24H152z' fill='%23566a89' opacity='0.7'/%3E%3C/svg%3E">
+
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang&family=Song+Myung&family=Nanum+Myeongjo&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/iropke-batang-font@1.0.2/font.css">
@@ -26,6 +28,9 @@
             --btn-hover: #475872;
             --font-ui: 'Pretendard Variable', sans-serif;
             --sidebar-width: 280px;
+            /* 아이폰 안전 영역 변수 */
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -35,6 +40,8 @@
             background-color: var(--bg-body);
             color: var(--text-main);
             height: 100vh;
+            /* 모바일 주소창 밀림 방지 */
+            min-height: -webkit-fill-available;
             display: flex;
             overflow: hidden;
             font-size: 16px;
@@ -44,8 +51,10 @@
         .sidebar { 
             width: var(--sidebar-width); background: var(--bg-sidebar); border-right: 1px solid var(--border-color); 
             display: flex; flex-direction: column; padding: 40px 20px; flex-shrink: 0; 
-            transition: transform 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 100;
+            /* 아이폰 하단 영역 대응 */
+            padding-bottom: calc(20px + var(--safe-bottom));
         }
 
         @media (max-width: 768px) {
@@ -53,6 +62,7 @@
                 position: absolute; left: 0; top: 0; bottom: 0;
                 transform: translateX(-100%); width: 85%;
                 box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+                padding-top: calc(20px + var(--safe-top));
             }
             .sidebar.open { transform: translateX(0); }
         }
@@ -78,7 +88,7 @@
 
         /* --- Lock Screen UI (Sidebar) --- */
         #sidebarLockArea { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
-        .lock-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; text-align: center; font-size: 16px; font-family: var(--font-ui); }
+        .lock-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; text-align: center; font-size: 16px; font-family: var(--font-ui); -webkit-appearance: none; }
         .btn-unlock { width: 100%; padding: 12px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
         /* --- Main Area --- */
@@ -93,56 +103,74 @@
         }
 
         .mobile-header {
-            display: none; height: 50px; align-items: center; padding: 0 15px; 
+            display: none; height: 56px; align-items: center; padding: 0 15px; 
             background: white; border-bottom: 1px solid #eee; flex-shrink: 0;
+            /* 아이폰 노치 영역만큼 상단 여백 추가 */
+            padding-top: var(--safe-top);
+            height: calc(56px + var(--safe-top));
         }
-        .btn-menu { border: none; background: none; font-size: 24px; cursor: pointer; color: #333; }
-        .header-title { margin-left: 10px; font-weight: 700; font-size: 16px; }
+        .btn-menu { border: none; background: none; font-size: 24px; cursor: pointer; color: #333; padding: 5px; }
+        .header-title { margin-left: 10px; font-weight: 700; font-size: 17px; }
 
         @media (max-width: 768px) { .mobile-header { display: flex; } }
 
         /* --- List View --- */
-        #listView { padding: 30px; overflow-y: auto; height: 100%; -webkit-overflow-scrolling: touch; }
-        @media (max-width: 768px) { #listView { padding: 15px; } }
+        #listView { 
+            padding: 20px; overflow-y: auto; height: 100%; -webkit-overflow-scrolling: touch; 
+            /* 하단 안전 영역 확보 */
+            padding-bottom: calc(30px + var(--safe-bottom));
+        }
 
-        .list-header { margin-bottom: 20px; font-size: 20px; font-weight: 700; color: var(--text-main); }
-        .card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); cursor: pointer; }
-        .card-meta { font-size: 12px; color: var(--text-light); margin-bottom: 8px; display: flex; gap: 8px; }
-        .card-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: #333; }
-        .card-preview { font-size: 14px; color: var(--text-sub); line-height: 1.5; max-height: 44px; overflow: hidden; }
+        .list-header { margin-bottom: 20px; font-size: 22px; font-weight: 700; color: var(--text-main); }
+        .card { background: white; padding: 22px; border-radius: 16px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); cursor: pointer; border: 1px solid white;}
+        .card:active { transform: scale(0.98); background: #fafafa; }
+        .card-meta { font-size: 13px; color: var(--text-light); margin-bottom: 8px; display: flex; gap: 8px; }
+        .card-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #333; }
+        .card-preview { font-size: 15px; color: var(--text-sub); line-height: 1.5; max-height: 46px; overflow: hidden; }
 
         /* --- Read/Editor View --- */
-        .view-container { display: none; height: 100%; background: white; padding: 40px; overflow-y: auto; position: absolute; top: 0; left: 0; width: 100%; z-index: 50; }
-        @media (max-width: 768px) { .view-container { padding: 20px; top: 50px; height: calc(100% - 50px); } }
-
-        .btn-back { font-size: 15px; padding: 10px 0; border:none; background:none; color: var(--text-sub); margin-bottom: 10px; display:flex; align-items: center; cursor: pointer; }
+        .view-container { 
+            display: none; height: 100%; background: white; 
+            padding: 20px; overflow-y: auto; position: absolute; top: 0; left: 0; width: 100%; z-index: 50; 
+            /* 하단 안전 영역 확보 */
+            padding-bottom: calc(40px + var(--safe-bottom));
+        }
         
-        #titleInput { width: 100%; border: none; font-size: 24px; font-weight: 700; margin-bottom: 20px; padding: 10px 0; border-bottom: 1px solid #eee; border-radius: 0; font-family: var(--font-ui); outline: none; }
+        @media (max-width: 768px) { 
+            .view-container { 
+                top: calc(56px + var(--safe-top)); 
+                height: calc(100% - (56px + var(--safe-top))); 
+            } 
+        }
+
+        .btn-back { font-size: 16px; padding: 12px 0; border:none; background:none; color: var(--text-sub); margin-bottom: 5px; display:flex; align-items: center; cursor: pointer; }
+        
+        #titleInput { width: 100%; border: none; font-size: 24px; font-weight: 700; margin-bottom: 20px; padding: 15px 0; border-bottom: 1px solid #eee; border-radius: 0; font-family: var(--font-ui); outline: none; background: transparent; }
         
         /* [중요] 스타일 깨짐 방지: 에디터 및 뷰어 공통 스타일 */
         #contentInput, .read-content { 
-            font-size: 16px; line-height: 1.8; min-height: 300px; outline: none; 
+            font-size: 17px; line-height: 1.7; min-height: 300px; outline: none; 
             color: #333; font-family: var(--font-ui); 
             white-space: pre-wrap; word-break: break-word;
         }
         /* 구분선 스타일 강제 지정 */
         #contentInput hr, .read-content hr, hr {
-            border: 0; border-top: 1px solid #e0e0e0; margin: 20px 0;
+            border: 0; border-top: 1px solid #e0e0e0; margin: 25px 0;
         }
         /* 이미지 스타일 */
-        #contentInput img, .read-content img { max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin: 10px 0; }
+        #contentInput img, .read-content img { max-width: 100%; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin: 15px 0; }
 
         .read-category { font-size: 13px; color: var(--accent-color); font-weight: 600; background: #eff2f6; padding: 4px 10px; border-radius: 12px; display: inline-block; margin-bottom: 10px; }
         .read-title { font-size: 26px; font-weight: 700; margin-bottom: 10px; line-height: 1.3; color: #333; }
         
         .toolbar { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; white-space: nowrap; -ms-overflow-style: none; scrollbar-width: none; align-items: center; }
         .toolbar::-webkit-scrollbar { display: none; }
-        .tool-chip button { background: #f3f4f6; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+        .tool-chip button { background: #f3f4f6; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 14px; }
         .btn-line-add { font-size: 13px; font-weight: 600; color: #555; background: #fff; border: 1px solid #ddd; padding: 6px 12px; border-radius: 20px; cursor: pointer; }
 
-        .editor-actions { padding: 20px 0; display: flex; justify-content: flex-end; gap: 10px; padding-bottom: 50px; border-top: 1px solid #f5f5f5; margin-top: 30px;}
-        .btn { padding: 12px 20px; border-radius: 8px; border:none; font-size: 15px; font-weight: 600; cursor: pointer; }
-        .btn-save { background: var(--accent-color); color: white; }
+        .editor-actions { padding: 20px 0; display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px; border-top: 1px solid #f9f9f9;}
+        .btn { padding: 14px 20px; border-radius: 10px; border:none; font-size: 15px; font-weight: 600; cursor: pointer; }
+        .btn-save { background: var(--accent-color); color: white; width: 100%; }
         .btn-cancel { background: #f0f0f0; color: #333; }
 
         /* Modal */
@@ -152,15 +180,14 @@
         .btn-close-modal { border:none; background:none; font-size: 20px; padding: 5px; cursor: pointer; color: #888; }
         
         .cat-list { max-height: 250px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #eee; border-radius: 8px; padding: 5px; }
-        .cat-row { display: flex; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid #f9f9f9; align-items: center; font-size: 14px; }
+        .cat-row { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #f9f9f9; align-items: center; font-size: 15px; }
         .cat-row:last-child { border-bottom: none; }
         .cat-btn-group { display: flex; gap: 5px; }
-        .btn-cat-action { font-size: 12px; color: #888; background: none; border: 1px solid #eee; border-radius: 4px; padding: 3px 6px; cursor: pointer; }
-        .btn-cat-action:hover { color: var(--accent-color); border-color: var(--accent-color); }
+        .btn-cat-action { font-size: 12px; color: #888; background: none; border: 1px solid #eee; border-radius: 4px; padding: 4px 8px; cursor: pointer; }
         
         .modal-input-area { display: flex; gap: 8px; }
-        .input-new-cat { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: var(--font-ui); outline: none; }
-        .btn-add-cat { padding: 0 15px; background: var(--accent-color); color: white; border:none; border-radius: 8px; white-space: nowrap; cursor: pointer; }
+        .input-new-cat { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: var(--font-ui); outline: none; -webkit-appearance: none;}
+        .btn-add-cat { padding: 0 18px; background: var(--accent-color); color: white; border:none; border-radius: 8px; white-space: nowrap; cursor: pointer; }
 
         .sidebar-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 90; }
     </style>
@@ -179,7 +206,7 @@
             <h3 style="margin-bottom:20px; color:#555;">Locked</h3>
             <input type="password" id="unlockCode" class="lock-input" placeholder="코드 입력" onkeyup="if(window.event.keyCode==13){checkCode()}">
             <button class="btn-unlock" onclick="checkCode()">접속</button>
-        </div>
+            </div>
 
         <div id="sidebarContent" style="display:none; flex-direction:column; height:100%;">
             <button class="btn-new" onclick="createNewPost()">+ 기록하기</button>
@@ -228,7 +255,7 @@
             <div class="editor-top" style="display:flex; justify-content:space-between; margin-bottom:15px;">
                 <button class="btn-back" onclick="goBackToList()">취소</button>
                 <div style="display:flex; align-items:center;">
-                    <select id="categorySelect" style="padding:8px; border:1px solid #ddd; border-radius:6px; outline:none;"></select>
+                    <select id="categorySelect" style="padding:8px; border:1px solid #ddd; border-radius:6px; outline:none; background:white;"></select>
                 </div>
             </div>
 
@@ -270,7 +297,7 @@
 
     <script>
         // --- 0. 잠금 및 데이터 설정 ---
-        const SECRET_CODE = "003170"; // 비밀번호 설정 (초기코드)
+        const SECRET_CODE = "1320"; // 비밀번호 설정
         let isLocked = true;
 
         let diaries = JSON.parse(localStorage.getItem('myDiaries')) || [];
@@ -333,7 +360,6 @@
             document.execCommand(cmd, false, val); 
         }
         function insertSeparator() { 
-            // 구분선 스타일 깨짐 방지를 위해 명시적 스타일 포함
             const hrHtml = '<hr style="border:0; border-top:1px solid #e0e0e0; margin:20px 0;">';
             document.execCommand('insertHTML', false, hrHtml); 
         }
@@ -458,7 +484,7 @@
 
         // --- 4. 렌더링 헬퍼 ---
         function renderSidebar() {
-            if(isLocked) return; // 잠금 상태면 렌더링 안함
+            if(isLocked) return; 
             const nav = document.getElementById('sidebarNav'); nav.innerHTML = '';
             addNavItem(nav, '전체 보기', diaries.length, 'ALL');
             
@@ -525,7 +551,7 @@
         }
         function removeImage() { currentImgData = null; document.getElementById('previewBox').style.display = 'none'; }
 
-        // --- 5. 카테고리 관리 (상세 기능 복구) ---
+        // --- 5. 카테고리 관리 ---
         function updateCategorySelectOptions() {
             const sel = document.getElementById('categorySelect'); sel.innerHTML = '';
             categories.filter(c=>!c.parentId).forEach(r => {
@@ -581,7 +607,6 @@
         }
         function delCat(id) {
             if(confirm('이 카테고리를 삭제할까요? (포함된 글은 미분류가 됩니다)')) {
-                // 자식 카테고리도 삭제
                 categories = categories.filter(c => c.id !== id && c.parentId !== id);
                 saveCat();
             }
