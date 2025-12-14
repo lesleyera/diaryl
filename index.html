@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>나만의 기록</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang&family=Song+Myung&family=Nanum+Myeongjo&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/iropke-batang-font@1.0.2/font.css">
+
+    <style>
+        :root {
+            --bg-body: #f8f8fa;
+            --bg-sidebar: #fdfdfd;
+            --text-main: #3d3d3d;      
+            --text-sub: #6e6e6e;       
+            --text-light: #9ca3af;     
+            --accent-color: #566a89;
+            --border-color: #ebebeb;
+            --btn-hover: #475872;
+            --font-ui: 'Pretendard Variable', sans-serif;
+            --sidebar-width: 280px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: var(--font-ui);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            font-size: 16px; /* 모바일 가독성 */
+        }
+
+        /* --- Sidebar (모바일 대응) --- */
+        .sidebar { 
+            width: var(--sidebar-width); background: var(--bg-sidebar); border-right: 1px solid var(--border-color); 
+            display: flex; flex-direction: column; padding: 40px 20px; flex-shrink: 0; 
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+
+        /* 모바일에서 사이드바 숨김 처리 */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                left: 0; top: 0; bottom: 0;
+                transform: translateX(-100%);
+                width: 80%;
+                box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            }
+            .sidebar.open { transform: translateX(0); }
+        }
+
+        .btn-new {
+            background-color: #475569; color: white; border: none; padding: 14px; border-radius: 12px;
+            font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 20px; width: 100%;
+            box-shadow: 0 4px 12px rgba(71, 85, 105, 0.15);
+        }
+
+        .nav-list { list-style: none; flex: 1; overflow-y: auto; margin-bottom: 20px; }
+        .nav-item { padding: 12px; border-radius: 8px; font-size: 15px; color: var(--text-sub); margin-bottom: 4px; display: flex; justify-content: space-between; }
+        .nav-item.active { background-color: #edf2f7; color: var(--accent-color); font-weight: 700; }
+        .nav-sub { padding-left: 28px; font-size: 14px; }
+
+        .sidebar-bottom { border-top: 1px solid #f5f5f5; padding-top: 20px; margin-top: 10px; }
+        .btn-setting-row {
+            display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px; 
+            background: none; border: none; color: #555; font-size: 15px; 
+        }
+        .copyright { margin-top: 5px; text-align: center; font-size: 11px; color: #ccc; }
+
+        /* --- Main Area --- */
+        .main { flex: 1; background: var(--bg-body); position: relative; overflow: hidden; display: flex; flex-direction: column; width: 100%; }
+
+        /* 모바일 헤더 (햄버거 버튼) */
+        .mobile-header {
+            display: none; height: 50px; align-items: center; padding: 0 15px; 
+            background: white; border-bottom: 1px solid #eee; flex-shrink: 0;
+        }
+        .btn-menu { border: none; background: none; font-size: 24px; cursor: pointer; color: #333; }
+        .header-title { margin-left: 10px; font-weight: 700; font-size: 16px; }
+
+        @media (max-width: 768px) {
+            .mobile-header { display: flex; }
+        }
+
+        /* --- List View --- */
+        #listView { padding: 30px; overflow-y: auto; height: 100%; -webkit-overflow-scrolling: touch; }
+        @media (max-width: 768px) { #listView { padding: 15px; } }
+
+        .list-header { margin-bottom: 20px; font-size: 20px; font-weight: 700; color: var(--text-main); }
+        .card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .card-meta { font-size: 12px; color: var(--text-light); margin-bottom: 8px; display: flex; gap: 8px; }
+        .card-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+        .card-preview { font-size: 14px; color: var(--text-sub); line-height: 1.5; max-height: 44px; overflow: hidden; }
+
+        /* --- View Container --- */
+        .view-container { display: none; height: 100%; background: white; padding: 40px; overflow-y: auto; position: absolute; top: 0; left: 0; width: 100%; z-index: 50; }
+        @media (max-width: 768px) { .view-container { padding: 20px; top: 50px; height: calc(100% - 50px); } }
+
+        .btn-back { font-size: 15px; padding: 10px 0; border:none; background:none; color: var(--text-sub); margin-bottom: 10px; display:block;}
+        
+        /* Editor & Read Styles */
+        #titleInput { width: 100%; border: none; font-size: 22px; font-weight: 700; margin-bottom: 20px; padding: 10px 0; border-bottom: 1px solid #eee; border-radius: 0; }
+        #contentInput, .read-content { font-size: 16px; line-height: 1.6; min-height: 300px; outline: none; }
+        .read-title { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+        
+        /* Toolbar (Scrollable on mobile) */
+        .toolbar { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; white-space: nowrap; -ms-overflow-style: none; scrollbar-width: none; }
+        .toolbar::-webkit-scrollbar { display: none; }
+        .tool-chip { flex-shrink: 0; }
+
+        .editor-actions { padding: 20px 0; display: flex; justify-content: flex-end; gap: 10px; padding-bottom: 50px;} /* 모바일 하단 여백 확보 */
+        .btn { padding: 12px 20px; border-radius: 8px; border:none; font-size: 15px; font-weight: 600; }
+        .btn-save { background: var(--accent-color); color: white; }
+        .btn-cancel { background: #f0f0f0; color: #333; }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 999; align-items: center; justify-content: center; }
+        .modal { background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 16px; }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .btn-close-modal { border:none; background:none; font-size: 20px; padding: 10px;}
+        
+        .cat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f5f5f5; align-items: center;}
+        .input-new-cat { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-right: 5px;}
+        .btn-add-cat { padding: 0 15px; background: var(--accent-color); color: white; border:none; border-radius: 8px; white-space: nowrap;}
+
+        /* 오버레이 (사이드바 열렸을 때 뒷배경) */
+        .sidebar-overlay {
+            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.5); z-index: 90;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-header">
+        <button class="btn-menu" onclick="toggleSidebar()">☰</button>
+        <div class="header-title">Lessons Learned</div>
+    </div>
+
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <aside class="sidebar" id="sidebar">
+        <button class="btn-new" onclick="createNewPost()">+ 기록하기</button>
+        <ul class="nav-list" id="sidebarNav"></ul>
+
+        <button class="btn-setting-row" onclick="openCategoryModal()">
+            <span>⚙️ 카테고리 관리</span>
+        </button>
+        <div class="sidebar-bottom">
+            <div class="copyright">Web App v1.0</div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div id="listView">
+            <div class="list-header" id="listTitle">전체 보기</div>
+            <div class="card-container" id="cardContainer"></div>
+            <div id="emptyListState" style="display:none; text-align:center; color:#ccc; margin-top:100px;">
+                기록된 이야기가 없습니다.<br>첫 번째 기록을 남겨보세요.
+            </div>
+        </div>
+
+        <div id="readView" class="view-container">
+            <div class="editor-top">
+                <button class="btn-back" onclick="goBackToList()">← 뒤로가기</button>
+            </div>
+            <div class="read-category" id="readCategory"></div>
+            <div class="read-title" id="readTitle"></div>
+            <div class="read-meta" id="readMeta" style="color:#999; font-size:13px; margin-bottom:20px;"></div>
+            <hr style="opacity:0.3; margin: 10px 0;">
+            <div id="readImageContainer" style="display:none; margin:15px 0;"><img id="readImage" src="" style="max-width:100%; border-radius:8px;"></div>
+            <div class="read-content" id="readContent"></div>
+            <div class="editor-actions">
+                <button class="btn btn-cancel" onclick="downloadEntryHTML()">파일저장</button>
+                <button class="btn btn-cancel" onclick="deleteCurrentEntry()">삭제</button>
+                <button class="btn btn-save" onclick="editCurrentEntry()">수정</button>
+            </div>
+        </div>
+
+        <div id="editorView" class="view-container">
+            <div class="editor-top">
+                <button class="btn-back" onclick="goBackToList()">취소</button>
+                <div style="display:flex; align-items:center;">
+                    <select id="categorySelect" style="padding:8px; border:1px solid #ddd; border-radius:6px;"></select>
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <div class="tool-chip"><button onclick="document.getElementById('imgInput').click()" style="border:none; bg:none;">📷</button></div>
+                <div class="tool-chip"><input type="color" id="colorInput" onchange="execCmd('foreColor', this.value)" style="width:24px; height:24px; border:none;"></div>
+                <div class="tool-chip"><button class="btn-line-add" onclick="insertSeparator()">― 구분선</button></div>
+                </div>
+            <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="handleImage(this)">
+
+            <input type="text" id="titleInput" placeholder="제목">
+            
+            <div id="previewBox" class="preview-box" style="display:none; position:relative; margin-bottom:15px;">
+                <img id="imgPreview" src="" style="max-width:100%; border-radius:8px;">
+                <button onclick="removeImage()" style="position:absolute; top:5px; right:5px; background:rgba(0,0,0,0.5); color:white; border:none; border-radius:50%; width:24px; height:24px;">X</button>
+            </div>
+
+            <div id="contentInput" contenteditable="true" placeholder="내용을 입력하세요..."></div>
+
+            <div class="editor-actions">
+                <button class="btn btn-save" onclick="saveEntry()" style="width:100%;">저장하기</button>
+            </div>
+        </div>
+    </main>
+
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>카테고리</h3>
+                <button class="btn-close-modal" onclick="closeModal()">✕</button>
+            </div>
+            <div class="cat-list" id="catManagerList" style="max-height:200px; overflow-y:auto; margin-bottom:15px;"></div>
+            <div class="modal-input-area" style="display:flex;">
+                <input type="text" id="newCatName" class="input-new-cat" placeholder="새 카테고리">
+                <button class="btn-add-cat" onclick="addRootCategory()">등록</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. 데이터 초기화 ---
+        let diaries = JSON.parse(localStorage.getItem('myDiaries')) || [];
+        let categories = JSON.parse(localStorage.getItem('myCategories')) || [
+            { id: 'def_1', name: '일상', parentId: null },
+            { id: 'def_2', name: '생각', parentId: null }
+        ];
+
+        let currentFilterCat = 'ALL';
+        let editingId = null; 
+        let currentImgData = null;
+
+        // --- 2. 기본 UI 렌더링 ---
+        renderSidebar();
+        renderCardList('ALL');
+
+        // 모바일 사이드바 제어
+        function toggleSidebar() {
+            const sb = document.getElementById('sidebar');
+            const ov = document.querySelector('.sidebar-overlay');
+            if(sb.classList.contains('open')) {
+                sb.classList.remove('open');
+                ov.style.display = 'none';
+            } else {
+                sb.classList.add('open');
+                ov.style.display = 'block';
+            }
+        }
+
+        // --- 3. 에디터 기능 ---
+        function execCmd(cmd, val) { document.execCommand(cmd, false, val); }
+        function insertSeparator() { document.execCommand('insertHTML', false, '<hr>'); }
+        
+        function switchView(mode) {
+            document.querySelectorAll('.view-container').forEach(el => el.style.display = 'none');
+            document.getElementById('listView').style.display = 'none';
+            
+            if(mode === 'list') {
+                document.getElementById('listView').style.display = 'block';
+            } else {
+                document.getElementById(mode + 'View').style.display = 'block';
+            }
+            // 모바일에서 뷰 전환 시 사이드바 닫기
+            document.getElementById('sidebar').classList.remove('open');
+            document.querySelector('.sidebar-overlay').style.display = 'none';
+        }
+
+        function goBackToList() { switchView('list'); }
+
+        function createNewPost() {
+            editingId = null; currentImgData = null;
+            document.getElementById('titleInput').value = ''; 
+            document.getElementById('contentInput').innerHTML = ''; 
+            removeImage(); updateCategorySelectOptions();
+            switchView('editor');
+        }
+
+        // [중요] 저장 기능 (localStorage 사용)
+        function saveEntry() {
+            const title = document.getElementById('titleInput').value.trim();
+            if(!title) return alert('제목을 입력해주세요.');
+
+            const now = new Date();
+            const entry = {
+                id: editingId || now.getTime(),
+                timestamp: now.getTime(),
+                title: title,
+                content: document.getElementById('contentInput').innerHTML, 
+                categoryId: document.getElementById('categorySelect').value,
+                image: currentImgData
+            };
+
+            if(editingId) {
+                const idx = diaries.findIndex(d => d.id === editingId);
+                diaries[idx] = entry;
+            } else {
+                diaries.push(entry);
+                editingId = entry.id;
+            }
+            localStorage.setItem('myDiaries', JSON.stringify(diaries));
+            
+            renderSidebar();
+            alert("저장되었습니다."); // 브라우저 저장 완료
+            openViewer(entry.id);
+        }
+
+        // 뷰어 열기
+        function openViewer(id) {
+            const entry = diaries.find(d => d.id === id);
+            if(!entry) return;
+            editingId = entry.id; // 현재 보고 있는 글 ID 저장
+
+            const cat = categories.find(c => c.id === entry.categoryId);
+            document.getElementById('readCategory').innerText = cat ? cat.name : "미분류";
+            document.getElementById('readTitle').innerText = entry.title;
+            
+            const dObj = new Date(entry.timestamp);
+            document.getElementById('readMeta').innerText = dObj.toLocaleDateString() + ' ' + dObj.toLocaleTimeString();
+            document.getElementById('readContent').innerHTML = entry.content;
+            
+            if(entry.image) {
+                document.getElementById('readImage').src = entry.image;
+                document.getElementById('readImageContainer').style.display = 'block';
+            } else {
+                document.getElementById('readImageContainer').style.display = 'none';
+            }
+            switchView('read');
+        }
+
+        function editCurrentEntry() {
+            const entry = diaries.find(d => d.id === editingId);
+            if(!entry) return;
+            document.getElementById('titleInput').value = entry.title;
+            document.getElementById('contentInput').innerHTML = entry.content;
+            updateCategorySelectOptions();
+            document.getElementById('categorySelect').value = entry.categoryId || '';
+            if(entry.image) {
+                currentImgData = entry.image;
+                document.getElementById('imgPreview').src = entry.image;
+                document.getElementById('previewBox').style.display = 'block';
+            }
+            switchView('editor');
+        }
+
+        function deleteCurrentEntry() {
+            if(confirm('정말 삭제할까요?')) {
+                diaries = diaries.filter(d => d.id !== editingId);
+                localStorage.setItem('myDiaries', JSON.stringify(diaries));
+                renderSidebar(); renderCardList('ALL'); goBackToList();
+            }
+        }
+
+        // [중요] 파일 저장 기능 대체 (HTML 다운로드)
+        function downloadEntryHTML() {
+            const entry = diaries.find(d => d.id === editingId);
+            if(!entry) return;
+
+            const htmlContent = `
+            <html>
+            <head><title>${entry.title}</title></head>
+            <body>
+                <h1>${entry.title}</h1>
+                <p>${new Date(entry.timestamp).toLocaleString()}</p>
+                <hr>
+                ${entry.image ? `<img src="${entry.image}" style="max-width:100%"><br>` : ''}
+                ${entry.content}
+            </body>
+            </html>`;
+            
+            const blob = new Blob([htmlContent], {type: "text/html;charset=utf-8"});
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `${entry.title}.html`;
+            a.click();
+        }
+
+        // --- 4. 렌더링 헬퍼 ---
+        function renderSidebar() {
+            const nav = document.getElementById('sidebarNav'); nav.innerHTML = '';
+            addNavItem(nav, '전체 보기', diaries.length, 'ALL');
+            categories.filter(c => !c.parentId).forEach(root => {
+                const count = diaries.filter(d => d.categoryId === root.id).length;
+                addNavItem(nav, root.name, count, root.id);
+                categories.filter(c => c.parentId === root.id).forEach(child => {
+                    const cCount = diaries.filter(d => d.categoryId === child.id).length;
+                    addNavItem(nav, `└ ${child.name}`, cCount, child.id, true);
+                });
+            });
+        }
+        function addNavItem(parent, name, count, id, isSub=false) {
+            const li = document.createElement('li');
+            li.className = `nav-item ${isSub?'nav-sub':''} ${currentFilterCat===id?'active':''}`;
+            li.innerHTML = `<span>${name}</span><span style="font-size:11px; color:#ccc">${count}</span>`;
+            li.onclick = () => { currentFilterCat = id; renderSidebar(); renderCardList(id); toggleSidebar(); switchView('list'); };
+            parent.appendChild(li);
+        }
+
+        function renderCardList(catId) {
+            const container = document.getElementById('cardContainer'); container.innerHTML = '';
+            const catName = catId==='ALL' ? "전체 보기" : (categories.find(c=>c.id===catId)||{}).name;
+            document.getElementById('listTitle').innerText = catName || "목록";
+            
+            let list = catId==='ALL' ? diaries : diaries.filter(d => d.categoryId === catId);
+            list.sort((a,b) => b.timestamp - a.timestamp);
+            document.getElementById('emptyListState').style.display = list.length?'none':'block';
+            
+            list.forEach(d => {
+                const dateStr = new Date(d.timestamp).toLocaleDateString();
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = d.content;
+                const cleanText = tempDiv.textContent || "";
+                
+                const card = document.createElement('div'); card.className = 'card';
+                card.onclick = () => openViewer(d.id);
+                card.innerHTML = `<div class="card-meta"><span>${dateStr}</span></div><div class="card-title">${d.title}</div><div class="card-preview">${cleanText}</div>`;
+                container.appendChild(card);
+            });
+        }
+
+        // 이미지 처리
+        function handleImage(input) {
+            const file = input.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const maxW = 600; let w=img.width, h=img.height;
+                    if(w>maxW){ h*=maxW/w; w=maxW; }
+                    canvas.width=w; canvas.height=h;
+                    canvas.getContext('2d').drawImage(img,0,0,w,h);
+                    currentImgData = canvas.toDataURL('image/jpeg', 0.7);
+                    document.getElementById('imgPreview').src = currentImgData;
+                    document.getElementById('previewBox').style.display = 'block';
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file); input.value = '';
+        }
+        function removeImage() { currentImgData = null; document.getElementById('previewBox').style.display = 'none'; }
+
+        // 카테고리 관리
+        function updateCategorySelectOptions() {
+            const sel = document.getElementById('categorySelect'); sel.innerHTML = '';
+            categories.filter(c=>!c.parentId).forEach(r => {
+                const opt = document.createElement('option'); opt.value = r.id; opt.innerText = r.name; sel.appendChild(opt);
+                categories.filter(c=>c.parentId===r.id).forEach(ch => {
+                    const sub = document.createElement('option'); sub.value = ch.id; sub.innerText = `  └ ${ch.name}`; sel.appendChild(sub);
+                });
+            });
+        }
+        
+        function openCategoryModal() { document.getElementById('modalOverlay').style.display = 'flex'; renderCatManager(); }
+        function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; renderSidebar(); updateCategorySelectOptions(); }
+        function renderCatManager() {
+            const list = document.getElementById('catManagerList'); list.innerHTML = '';
+            categories.forEach(c => {
+                const row = document.createElement('div'); row.className = 'cat-row';
+                row.innerHTML = `<span>${c.name}</span> <button style="color:red; border:none; background:none;" onclick="delCat('${c.id}')">삭제</button>`;
+                list.appendChild(row);
+            });
+        }
+        function addRootCategory() {
+            const name = document.getElementById('newCatName').value.trim();
+            if(name) { categories.push({id:'cat_'+Date.now(), name:name, parentId:null}); localStorage.setItem('myCategories', JSON.stringify(categories)); document.getElementById('newCatName').value=''; renderCatManager(); }
+        }
+        function delCat(id) {
+            if(confirm('삭제?')) { categories = categories.filter(c=>c.id!==id); localStorage.setItem('myCategories', JSON.stringify(categories)); renderCatManager(); }
+        }
+    </script>
+</body>
+</html>
