@@ -40,7 +40,6 @@
             background-color: var(--bg-body);
             color: var(--text-main);
             height: 100vh;
-            /* 모바일 주소창 밀림 방지 */
             min-height: -webkit-fill-available;
             display: flex;
             overflow: hidden;
@@ -53,7 +52,6 @@
             display: flex; flex-direction: column; padding: 40px 20px; flex-shrink: 0; 
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 100;
-            /* 아이폰 하단 영역 대응 */
             padding-bottom: calc(20px + var(--safe-bottom));
         }
 
@@ -86,7 +84,7 @@
         }
         .copyright { margin-top: 5px; text-align: center; font-size: 11px; color: #ccc; }
 
-        /* --- Lock Screen UI (Sidebar) --- */
+        /* --- Lock Screen UI --- */
         #sidebarLockArea { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
         .lock-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; text-align: center; font-size: 16px; font-family: var(--font-ui); -webkit-appearance: none; }
         .btn-unlock { width: 100%; padding: 12px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
@@ -94,7 +92,6 @@
         /* --- Main Area --- */
         .main { flex: 1; background: var(--bg-body); position: relative; overflow: hidden; display: flex; flex-direction: column; width: 100%; }
         
-        /* 잠금 상태 메인 화면 커버 */
         #mainLockCover {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: #f8f8fa; z-index: 900;
@@ -105,7 +102,6 @@
         .mobile-header {
             display: none; height: 56px; align-items: center; padding: 0 15px; 
             background: white; border-bottom: 1px solid #eee; flex-shrink: 0;
-            /* 아이폰 노치 영역만큼 상단 여백 추가 */
             padding-top: var(--safe-top);
             height: calc(56px + var(--safe-top));
         }
@@ -117,7 +113,6 @@
         /* --- List View --- */
         #listView { 
             padding: 20px; overflow-y: auto; height: 100%; -webkit-overflow-scrolling: touch; 
-            /* 하단 안전 영역 확보 */
             padding-bottom: calc(30px + var(--safe-bottom));
         }
 
@@ -132,7 +127,6 @@
         .view-container { 
             display: none; height: 100%; background: white; 
             padding: 20px; overflow-y: auto; position: absolute; top: 0; left: 0; width: 100%; z-index: 50; 
-            /* 하단 안전 영역 확보 */
             padding-bottom: calc(40px + var(--safe-bottom));
         }
         
@@ -143,21 +137,32 @@
             } 
         }
 
+        /* [핵심 수정] 에디터 모드 (글쓰기) 전용 스타일: 왼쪽 바, 상단 메뉴바 숨김 */
+        body.view-editor .sidebar { display: none !important; }
+        body.view-editor .mobile-header { display: none !important; }
+        body.view-editor .main { width: 100% !important; }
+        
+        /* 에디터가 켜졌을 때 뷰 컨테이너를 전체 화면으로 확장 */
+        body.view-editor .view-container {
+            top: 0 !important;
+            height: 100% !important;
+            padding-top: calc(20px + var(--safe-top)) !important; /* 상단 노치 영역 확보 */
+            padding-bottom: var(--safe-bottom) !important;
+            z-index: 200;
+        }
+
         .btn-back { font-size: 16px; padding: 12px 0; border:none; background:none; color: var(--text-sub); margin-bottom: 5px; display:flex; align-items: center; cursor: pointer; }
         
         #titleInput { width: 100%; border: none; font-size: 24px; font-weight: 700; margin-bottom: 20px; padding: 15px 0; border-bottom: 1px solid #eee; border-radius: 0; font-family: var(--font-ui); outline: none; background: transparent; }
         
-        /* [중요] 스타일 깨짐 방지: 에디터 및 뷰어 공통 스타일 */
         #contentInput, .read-content { 
             font-size: 17px; line-height: 1.7; min-height: 300px; outline: none; 
             color: #333; font-family: var(--font-ui); 
             white-space: pre-wrap; word-break: break-word;
         }
-        /* 구분선 스타일 강제 지정 */
         #contentInput hr, .read-content hr, hr {
             border: 0; border-top: 1px solid #e0e0e0; margin: 25px 0;
         }
-        /* 이미지 스타일 */
         #contentInput img, .read-content img { max-width: 100%; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin: 15px 0; }
 
         .read-category { font-size: 13px; color: var(--accent-color); font-weight: 600; background: #eff2f6; padding: 4px 10px; border-radius: 12px; display: inline-block; margin-bottom: 10px; }
@@ -201,12 +206,11 @@
 
     <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
     <aside class="sidebar" id="sidebar">
-        
         <div id="sidebarLockArea">
             <h3 style="margin-bottom:20px; color:#555;">Locked</h3>
             <input type="password" id="unlockCode" class="lock-input" placeholder="코드 입력" onkeyup="if(window.event.keyCode==13){checkCode()}">
             <button class="btn-unlock" onclick="checkCode()">접속</button>
-            </div>
+        </div>
 
         <div id="sidebarContent" style="display:none; flex-direction:column; height:100%;">
             <button class="btn-new" onclick="createNewPost()">+ 기록하기</button>
@@ -297,7 +301,7 @@
 
     <script>
         // --- 0. 잠금 및 데이터 설정 ---
-        const SECRET_CODE = "1320"; // 비밀번호 설정
+        const SECRET_CODE = "0132"; 
         let isLocked = true;
 
         let diaries = JSON.parse(localStorage.getItem('myDiaries')) || [];
@@ -310,7 +314,6 @@
         let editingId = null; 
         let currentImgData = null;
 
-        // --- 1. 잠금 기능 ---
         function checkCode() {
             const input = document.getElementById('unlockCode').value;
             if(input === SECRET_CODE) {
@@ -326,7 +329,6 @@
             }
         }
 
-        // --- 2. 기본 UI 동작 ---
         function toggleSidebar() {
             const sb = document.getElementById('sidebar');
             const ov = document.querySelector('.sidebar-overlay');
@@ -339,15 +341,24 @@
             }
         }
 
+        // [핵심 수정] 뷰 전환 시 'editor' 모드면 body에 클래스 추가 (전체화면 효과)
         function switchView(mode) {
             document.querySelectorAll('.view-container').forEach(el => el.style.display = 'none');
             document.getElementById('listView').style.display = 'none';
             
-            if(mode === 'list') {
-                document.getElementById('listView').style.display = 'block';
+            // 에디터 뷰일 때만 'view-editor' 클래스 추가하여 사이드바/헤더 숨김
+            if(mode === 'editor') {
+                document.body.classList.add('view-editor');
+                document.getElementById('editorView').style.display = 'block';
             } else {
-                document.getElementById(mode + 'View').style.display = 'block';
+                document.body.classList.remove('view-editor');
+                if(mode === 'list') {
+                    document.getElementById('listView').style.display = 'block';
+                } else {
+                    document.getElementById(mode + 'View').style.display = 'block';
+                }
             }
+            
             // 모바일 사이드바 닫기
             document.getElementById('sidebar').classList.remove('open');
             document.querySelector('.sidebar-overlay').style.display = 'none';
@@ -355,7 +366,6 @@
 
         function goBackToList() { switchView('list'); }
 
-        // --- 3. 에디터 기능 ---
         function execCmd(cmd, val) { 
             document.execCommand(cmd, false, val); 
         }
@@ -444,7 +454,6 @@
             }
         }
 
-        // [백업 기능] 파일 저장 (스타일 내장형)
         function downloadEntryHTML() {
             const entry = diaries.find(d => d.id === editingId);
             if(!entry) return;
@@ -482,7 +491,6 @@
             a.click();
         }
 
-        // --- 4. 렌더링 헬퍼 ---
         function renderSidebar() {
             if(isLocked) return; 
             const nav = document.getElementById('sidebarNav'); nav.innerHTML = '';
@@ -551,7 +559,6 @@
         }
         function removeImage() { currentImgData = null; document.getElementById('previewBox').style.display = 'none'; }
 
-        // --- 5. 카테고리 관리 ---
         function updateCategorySelectOptions() {
             const sel = document.getElementById('categorySelect'); sel.innerHTML = '';
             categories.filter(c=>!c.parentId).forEach(r => {
