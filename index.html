@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>나만의 기록</title>
+    <title>Lessons Learned</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
     
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang&family=Song+Myung&family=Nanum+Myeongjo&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
@@ -35,10 +37,10 @@
             height: 100vh;
             display: flex;
             overflow: hidden;
-            font-size: 16px; /* 모바일 가독성 */
+            font-size: 16px;
         }
 
-        /* --- Sidebar (모바일 대응) --- */
+        /* --- Sidebar --- */
         .sidebar { 
             width: var(--sidebar-width); background: var(--bg-sidebar); border-right: 1px solid var(--border-color); 
             display: flex; flex-direction: column; padding: 40px 20px; flex-shrink: 0; 
@@ -46,13 +48,10 @@
             z-index: 100;
         }
 
-        /* 모바일에서 사이드바 숨김 처리 */
         @media (max-width: 768px) {
             .sidebar {
-                position: absolute;
-                left: 0; top: 0; bottom: 0;
-                transform: translateX(-100%);
-                width: 80%;
+                position: absolute; left: 0; top: 0; bottom: 0;
+                transform: translateX(-100%); width: 85%;
                 box-shadow: 2px 0 10px rgba(0,0,0,0.1);
             }
             .sidebar.open { transform: translateX(0); }
@@ -65,21 +64,34 @@
         }
 
         .nav-list { list-style: none; flex: 1; overflow-y: auto; margin-bottom: 20px; }
-        .nav-item { padding: 12px; border-radius: 8px; font-size: 15px; color: var(--text-sub); margin-bottom: 4px; display: flex; justify-content: space-between; }
+        .nav-item { padding: 12px; border-radius: 8px; font-size: 15px; color: var(--text-sub); margin-bottom: 4px; display: flex; justify-content: space-between; cursor: pointer; }
+        .nav-item:hover { background-color: #f3f4f6; }
         .nav-item.active { background-color: #edf2f7; color: var(--accent-color); font-weight: 700; }
         .nav-sub { padding-left: 28px; font-size: 14px; }
 
         .sidebar-bottom { border-top: 1px solid #f5f5f5; padding-top: 20px; margin-top: 10px; }
         .btn-setting-row {
             display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px; 
-            background: none; border: none; color: #555; font-size: 15px; 
+            background: none; border: none; color: #555; font-size: 15px; cursor: pointer;
         }
         .copyright { margin-top: 5px; text-align: center; font-size: 11px; color: #ccc; }
 
+        /* --- Lock Screen UI (Sidebar) --- */
+        #sidebarLockArea { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+        .lock-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; text-align: center; font-size: 16px; font-family: var(--font-ui); }
+        .btn-unlock { width: 100%; padding: 12px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
         /* --- Main Area --- */
         .main { flex: 1; background: var(--bg-body); position: relative; overflow: hidden; display: flex; flex-direction: column; width: 100%; }
+        
+        /* 잠금 상태 메인 화면 커버 */
+        #mainLockCover {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #f8f8fa; z-index: 900;
+            display: flex; align-items: center; justify-content: center;
+            color: #999; font-size: 14px;
+        }
 
-        /* 모바일 헤더 (햄버거 버튼) */
         .mobile-header {
             display: none; height: 50px; align-items: center; padding: 0 15px; 
             background: white; border-bottom: 1px solid #eee; flex-shrink: 0;
@@ -87,56 +99,70 @@
         .btn-menu { border: none; background: none; font-size: 24px; cursor: pointer; color: #333; }
         .header-title { margin-left: 10px; font-weight: 700; font-size: 16px; }
 
-        @media (max-width: 768px) {
-            .mobile-header { display: flex; }
-        }
+        @media (max-width: 768px) { .mobile-header { display: flex; } }
 
         /* --- List View --- */
         #listView { padding: 30px; overflow-y: auto; height: 100%; -webkit-overflow-scrolling: touch; }
         @media (max-width: 768px) { #listView { padding: 15px; } }
 
         .list-header { margin-bottom: 20px; font-size: 20px; font-weight: 700; color: var(--text-main); }
-        .card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); cursor: pointer; }
         .card-meta { font-size: 12px; color: var(--text-light); margin-bottom: 8px; display: flex; gap: 8px; }
-        .card-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+        .card-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: #333; }
         .card-preview { font-size: 14px; color: var(--text-sub); line-height: 1.5; max-height: 44px; overflow: hidden; }
 
-        /* --- View Container --- */
+        /* --- Read/Editor View --- */
         .view-container { display: none; height: 100%; background: white; padding: 40px; overflow-y: auto; position: absolute; top: 0; left: 0; width: 100%; z-index: 50; }
         @media (max-width: 768px) { .view-container { padding: 20px; top: 50px; height: calc(100% - 50px); } }
 
-        .btn-back { font-size: 15px; padding: 10px 0; border:none; background:none; color: var(--text-sub); margin-bottom: 10px; display:block;}
+        .btn-back { font-size: 15px; padding: 10px 0; border:none; background:none; color: var(--text-sub); margin-bottom: 10px; display:flex; align-items: center; cursor: pointer; }
         
-        /* Editor & Read Styles */
-        #titleInput { width: 100%; border: none; font-size: 22px; font-weight: 700; margin-bottom: 20px; padding: 10px 0; border-bottom: 1px solid #eee; border-radius: 0; }
-        #contentInput, .read-content { font-size: 16px; line-height: 1.6; min-height: 300px; outline: none; }
-        .read-title { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+        #titleInput { width: 100%; border: none; font-size: 24px; font-weight: 700; margin-bottom: 20px; padding: 10px 0; border-bottom: 1px solid #eee; border-radius: 0; font-family: var(--font-ui); outline: none; }
         
-        /* Toolbar (Scrollable on mobile) */
-        .toolbar { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; white-space: nowrap; -ms-overflow-style: none; scrollbar-width: none; }
-        .toolbar::-webkit-scrollbar { display: none; }
-        .tool-chip { flex-shrink: 0; }
+        /* [중요] 스타일 깨짐 방지: 에디터 및 뷰어 공통 스타일 */
+        #contentInput, .read-content { 
+            font-size: 16px; line-height: 1.8; min-height: 300px; outline: none; 
+            color: #333; font-family: var(--font-ui); 
+            white-space: pre-wrap; word-break: break-word;
+        }
+        /* 구분선 스타일 강제 지정 */
+        #contentInput hr, .read-content hr, hr {
+            border: 0; border-top: 1px solid #e0e0e0; margin: 20px 0;
+        }
+        /* 이미지 스타일 */
+        #contentInput img, .read-content img { max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin: 10px 0; }
 
-        .editor-actions { padding: 20px 0; display: flex; justify-content: flex-end; gap: 10px; padding-bottom: 50px;} /* 모바일 하단 여백 확보 */
-        .btn { padding: 12px 20px; border-radius: 8px; border:none; font-size: 15px; font-weight: 600; }
+        .read-category { font-size: 13px; color: var(--accent-color); font-weight: 600; background: #eff2f6; padding: 4px 10px; border-radius: 12px; display: inline-block; margin-bottom: 10px; }
+        .read-title { font-size: 26px; font-weight: 700; margin-bottom: 10px; line-height: 1.3; color: #333; }
+        
+        .toolbar { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; white-space: nowrap; -ms-overflow-style: none; scrollbar-width: none; align-items: center; }
+        .toolbar::-webkit-scrollbar { display: none; }
+        .tool-chip button { background: #f3f4f6; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+        .btn-line-add { font-size: 13px; font-weight: 600; color: #555; background: #fff; border: 1px solid #ddd; padding: 6px 12px; border-radius: 20px; cursor: pointer; }
+
+        .editor-actions { padding: 20px 0; display: flex; justify-content: flex-end; gap: 10px; padding-bottom: 50px; border-top: 1px solid #f5f5f5; margin-top: 30px;}
+        .btn { padding: 12px 20px; border-radius: 8px; border:none; font-size: 15px; font-weight: 600; cursor: pointer; }
         .btn-save { background: var(--accent-color); color: white; }
         .btn-cancel { background: #f0f0f0; color: #333; }
 
         /* Modal */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 999; align-items: center; justify-content: center; }
-        .modal { background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 16px; }
-        .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
-        .btn-close-modal { border:none; background:none; font-size: 20px; padding: 10px;}
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 999; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+        .modal { background: white; width: 90%; max-width: 420px; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .btn-close-modal { border:none; background:none; font-size: 20px; padding: 5px; cursor: pointer; color: #888; }
         
-        .cat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f5f5f5; align-items: center;}
-        .input-new-cat { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-right: 5px;}
-        .btn-add-cat { padding: 0 15px; background: var(--accent-color); color: white; border:none; border-radius: 8px; white-space: nowrap;}
+        .cat-list { max-height: 250px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #eee; border-radius: 8px; padding: 5px; }
+        .cat-row { display: flex; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid #f9f9f9; align-items: center; font-size: 14px; }
+        .cat-row:last-child { border-bottom: none; }
+        .cat-btn-group { display: flex; gap: 5px; }
+        .btn-cat-action { font-size: 12px; color: #888; background: none; border: 1px solid #eee; border-radius: 4px; padding: 3px 6px; cursor: pointer; }
+        .btn-cat-action:hover { color: var(--accent-color); border-color: var(--accent-color); }
+        
+        .modal-input-area { display: flex; gap: 8px; }
+        .input-new-cat { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: var(--font-ui); outline: none; }
+        .btn-add-cat { padding: 0 15px; background: var(--accent-color); color: white; border:none; border-radius: 8px; white-space: nowrap; cursor: pointer; }
 
-        /* 오버레이 (사이드바 열렸을 때 뒷배경) */
-        .sidebar-overlay {
-            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.5); z-index: 90;
-        }
+        .sidebar-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 90; }
     </style>
 </head>
 <body>
@@ -148,35 +174,48 @@
 
     <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
     <aside class="sidebar" id="sidebar">
-        <button class="btn-new" onclick="createNewPost()">+ 기록하기</button>
-        <ul class="nav-list" id="sidebarNav"></ul>
+        
+        <div id="sidebarLockArea">
+            <h3 style="margin-bottom:20px; color:#555;">Locked</h3>
+            <input type="password" id="unlockCode" class="lock-input" placeholder="코드 입력" onkeyup="if(window.event.keyCode==13){checkCode()}">
+            <button class="btn-unlock" onclick="checkCode()">접속</button>
+        </div>
 
-        <button class="btn-setting-row" onclick="openCategoryModal()">
-            <span>⚙️ 카테고리 관리</span>
-        </button>
-        <div class="sidebar-bottom">
-            <div class="copyright">Web App v1.0</div>
+        <div id="sidebarContent" style="display:none; flex-direction:column; height:100%;">
+            <button class="btn-new" onclick="createNewPost()">+ 기록하기</button>
+            <ul class="nav-list" id="sidebarNav"></ul>
+
+            <button class="btn-setting-row" onclick="openCategoryModal()">
+                <span>⚙️ 카테고리 관리</span>
+            </button>
+            <div class="sidebar-bottom">
+                <div class="copyright">Powered by DWG Inc.</div>
+            </div>
         </div>
     </aside>
 
     <main class="main">
+        <div id="mainLockCover">
+            <div>🔒 왼편에 코드를 입력하세요</div>
+        </div>
+
         <div id="listView">
             <div class="list-header" id="listTitle">전체 보기</div>
             <div class="card-container" id="cardContainer"></div>
             <div id="emptyListState" style="display:none; text-align:center; color:#ccc; margin-top:100px;">
-                기록된 이야기가 없습니다.<br>첫 번째 기록을 남겨보세요.
+                기록된 이야기가 없습니다.
             </div>
         </div>
 
         <div id="readView" class="view-container">
-            <div class="editor-top">
+            <div class="editor-top" style="display:flex; justify-content:space-between;">
                 <button class="btn-back" onclick="goBackToList()">← 뒤로가기</button>
             </div>
             <div class="read-category" id="readCategory"></div>
             <div class="read-title" id="readTitle"></div>
             <div class="read-meta" id="readMeta" style="color:#999; font-size:13px; margin-bottom:20px;"></div>
-            <hr style="opacity:0.3; margin: 10px 0;">
-            <div id="readImageContainer" style="display:none; margin:15px 0;"><img id="readImage" src="" style="max-width:100%; border-radius:8px;"></div>
+            <hr>
+            <div id="readImageContainer" style="display:none; margin:15px 0;"><img id="readImage" src=""></div>
             <div class="read-content" id="readContent"></div>
             <div class="editor-actions">
                 <button class="btn btn-cancel" onclick="downloadEntryHTML()">파일저장</button>
@@ -186,25 +225,25 @@
         </div>
 
         <div id="editorView" class="view-container">
-            <div class="editor-top">
+            <div class="editor-top" style="display:flex; justify-content:space-between; margin-bottom:15px;">
                 <button class="btn-back" onclick="goBackToList()">취소</button>
                 <div style="display:flex; align-items:center;">
-                    <select id="categorySelect" style="padding:8px; border:1px solid #ddd; border-radius:6px;"></select>
+                    <select id="categorySelect" style="padding:8px; border:1px solid #ddd; border-radius:6px; outline:none;"></select>
                 </div>
             </div>
 
             <div class="toolbar">
-                <div class="tool-chip"><button onclick="document.getElementById('imgInput').click()" style="border:none; bg:none;">📷</button></div>
-                <div class="tool-chip"><input type="color" id="colorInput" onchange="execCmd('foreColor', this.value)" style="width:24px; height:24px; border:none;"></div>
+                <div class="tool-chip"><button onclick="document.getElementById('imgInput').click()">📷 사진</button></div>
+                <div class="tool-chip"><input type="color" id="colorInput" onchange="execCmd('foreColor', this.value)" style="width:30px; height:30px; border:none; background:none; cursor:pointer;"></div>
                 <div class="tool-chip"><button class="btn-line-add" onclick="insertSeparator()">― 구분선</button></div>
-                </div>
+            </div>
             <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="handleImage(this)">
 
             <input type="text" id="titleInput" placeholder="제목">
             
             <div id="previewBox" class="preview-box" style="display:none; position:relative; margin-bottom:15px;">
                 <img id="imgPreview" src="" style="max-width:100%; border-radius:8px;">
-                <button onclick="removeImage()" style="position:absolute; top:5px; right:5px; background:rgba(0,0,0,0.5); color:white; border:none; border-radius:50%; width:24px; height:24px;">X</button>
+                <button onclick="removeImage()" style="position:absolute; top:5px; right:5px; background:rgba(0,0,0,0.5); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer;">X</button>
             </div>
 
             <div id="contentInput" contenteditable="true" placeholder="내용을 입력하세요..."></div>
@@ -218,19 +257,22 @@
     <div id="modalOverlay" class="modal-overlay">
         <div class="modal">
             <div class="modal-header">
-                <h3>카테고리</h3>
+                <h3>카테고리 관리</h3>
                 <button class="btn-close-modal" onclick="closeModal()">✕</button>
             </div>
-            <div class="cat-list" id="catManagerList" style="max-height:200px; overflow-y:auto; margin-bottom:15px;"></div>
-            <div class="modal-input-area" style="display:flex;">
+            <div class="cat-list" id="catManagerList"></div>
+            <div class="modal-input-area">
                 <input type="text" id="newCatName" class="input-new-cat" placeholder="새 카테고리">
-                <button class="btn-add-cat" onclick="addRootCategory()">등록</button>
+                <button class="btn-add-cat" onclick="addRootCategory()">추가</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. 데이터 초기화 ---
+        // --- 0. 잠금 및 데이터 설정 ---
+        const SECRET_CODE = "003170"; // 비밀번호 설정 (초기코드)
+        let isLocked = true;
+
         let diaries = JSON.parse(localStorage.getItem('myDiaries')) || [];
         let categories = JSON.parse(localStorage.getItem('myCategories')) || [
             { id: 'def_1', name: '일상', parentId: null },
@@ -241,11 +283,23 @@
         let editingId = null; 
         let currentImgData = null;
 
-        // --- 2. 기본 UI 렌더링 ---
-        renderSidebar();
-        renderCardList('ALL');
+        // --- 1. 잠금 기능 ---
+        function checkCode() {
+            const input = document.getElementById('unlockCode').value;
+            if(input === SECRET_CODE) {
+                isLocked = false;
+                document.getElementById('sidebarLockArea').style.display = 'none';
+                document.getElementById('sidebarContent').style.display = 'flex';
+                document.getElementById('mainLockCover').style.display = 'none';
+                renderSidebar();
+                renderCardList('ALL');
+            } else {
+                alert('코드가 일치하지 않습니다.');
+                document.getElementById('unlockCode').value = '';
+            }
+        }
 
-        // 모바일 사이드바 제어
+        // --- 2. 기본 UI 동작 ---
         function toggleSidebar() {
             const sb = document.getElementById('sidebar');
             const ov = document.querySelector('.sidebar-overlay');
@@ -258,10 +312,6 @@
             }
         }
 
-        // --- 3. 에디터 기능 ---
-        function execCmd(cmd, val) { document.execCommand(cmd, false, val); }
-        function insertSeparator() { document.execCommand('insertHTML', false, '<hr>'); }
-        
         function switchView(mode) {
             document.querySelectorAll('.view-container').forEach(el => el.style.display = 'none');
             document.getElementById('listView').style.display = 'none';
@@ -271,12 +321,22 @@
             } else {
                 document.getElementById(mode + 'View').style.display = 'block';
             }
-            // 모바일에서 뷰 전환 시 사이드바 닫기
+            // 모바일 사이드바 닫기
             document.getElementById('sidebar').classList.remove('open');
             document.querySelector('.sidebar-overlay').style.display = 'none';
         }
 
         function goBackToList() { switchView('list'); }
+
+        // --- 3. 에디터 기능 ---
+        function execCmd(cmd, val) { 
+            document.execCommand(cmd, false, val); 
+        }
+        function insertSeparator() { 
+            // 구분선 스타일 깨짐 방지를 위해 명시적 스타일 포함
+            const hrHtml = '<hr style="border:0; border-top:1px solid #e0e0e0; margin:20px 0;">';
+            document.execCommand('insertHTML', false, hrHtml); 
+        }
 
         function createNewPost() {
             editingId = null; currentImgData = null;
@@ -286,7 +346,6 @@
             switchView('editor');
         }
 
-        // [중요] 저장 기능 (localStorage 사용)
         function saveEntry() {
             const title = document.getElementById('titleInput').value.trim();
             if(!title) return alert('제목을 입력해주세요.');
@@ -309,17 +368,15 @@
                 editingId = entry.id;
             }
             localStorage.setItem('myDiaries', JSON.stringify(diaries));
-            
             renderSidebar();
-            alert("저장되었습니다."); // 브라우저 저장 완료
+            alert("저장되었습니다.");
             openViewer(entry.id);
         }
 
-        // 뷰어 열기
         function openViewer(id) {
             const entry = diaries.find(d => d.id === id);
             if(!entry) return;
-            editingId = entry.id; // 현재 보고 있는 글 ID 저장
+            editingId = entry.id;
 
             const cat = categories.find(c => c.id === entry.categoryId);
             document.getElementById('readCategory').innerText = cat ? cat.name : "미분류";
@@ -361,20 +418,34 @@
             }
         }
 
-        // [중요] 파일 저장 기능 대체 (HTML 다운로드)
+        // [백업 기능] 파일 저장 (스타일 내장형)
         function downloadEntryHTML() {
             const entry = diaries.find(d => d.id === editingId);
             if(!entry) return;
 
             const htmlContent = `
-            <html>
-            <head><title>${entry.title}</title></head>
+            <!DOCTYPE html>
+            <html lang="ko">
+            <head>
+                <meta charset="UTF-8">
+                <title>${entry.title}</title>
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+                <style>
+                    body { font-family: 'Pretendard', sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.8; color: #333; }
+                    h1 { border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 10px; }
+                    .meta { color: #888; font-size: 14px; margin-bottom: 40px; }
+                    .content { white-space: pre-wrap; word-break: break-word; }
+                    hr { border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0; }
+                    img { max-width: 100%; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 20px 0; }
+                </style>
+            </head>
             <body>
                 <h1>${entry.title}</h1>
-                <p>${new Date(entry.timestamp).toLocaleString()}</p>
-                <hr>
-                ${entry.image ? `<img src="${entry.image}" style="max-width:100%"><br>` : ''}
-                ${entry.content}
+                <div class="meta">${new Date(entry.timestamp).toLocaleString()}</div>
+                <div class="content">
+                    ${entry.image ? `<img src="${entry.image}"><br>` : ''}
+                    ${entry.content}
+                </div>
             </body>
             </html>`;
             
@@ -387,17 +458,21 @@
 
         // --- 4. 렌더링 헬퍼 ---
         function renderSidebar() {
+            if(isLocked) return; // 잠금 상태면 렌더링 안함
             const nav = document.getElementById('sidebarNav'); nav.innerHTML = '';
             addNavItem(nav, '전체 보기', diaries.length, 'ALL');
+            
             categories.filter(c => !c.parentId).forEach(root => {
                 const count = diaries.filter(d => d.categoryId === root.id).length;
                 addNavItem(nav, root.name, count, root.id);
+                
                 categories.filter(c => c.parentId === root.id).forEach(child => {
                     const cCount = diaries.filter(d => d.categoryId === child.id).length;
                     addNavItem(nav, `└ ${child.name}`, cCount, child.id, true);
                 });
             });
         }
+
         function addNavItem(parent, name, count, id, isSub=false) {
             const li = document.createElement('li');
             li.className = `nav-item ${isSub?'nav-sub':''} ${currentFilterCat===id?'active':''}`;
@@ -407,6 +482,7 @@
         }
 
         function renderCardList(catId) {
+            if(isLocked) return;
             const container = document.getElementById('cardContainer'); container.innerHTML = '';
             const catName = catId==='ALL' ? "전체 보기" : (categories.find(c=>c.id===catId)||{}).name;
             document.getElementById('listTitle').innerText = catName || "목록";
@@ -428,7 +504,6 @@
             });
         }
 
-        // 이미지 처리
         function handleImage(input) {
             const file = input.files[0]; if(!file) return;
             const reader = new FileReader();
@@ -436,11 +511,11 @@
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const maxW = 600; let w=img.width, h=img.height;
+                    const maxW = 800; let w=img.width, h=img.height;
                     if(w>maxW){ h*=maxW/w; w=maxW; }
                     canvas.width=w; canvas.height=h;
                     canvas.getContext('2d').drawImage(img,0,0,w,h);
-                    currentImgData = canvas.toDataURL('image/jpeg', 0.7);
+                    currentImgData = canvas.toDataURL('image/jpeg', 0.8);
                     document.getElementById('imgPreview').src = currentImgData;
                     document.getElementById('previewBox').style.display = 'block';
                 }
@@ -450,7 +525,7 @@
         }
         function removeImage() { currentImgData = null; document.getElementById('previewBox').style.display = 'none'; }
 
-        // 카테고리 관리
+        // --- 5. 카테고리 관리 (상세 기능 복구) ---
         function updateCategorySelectOptions() {
             const sel = document.getElementById('categorySelect'); sel.innerHTML = '';
             categories.filter(c=>!c.parentId).forEach(r => {
@@ -463,20 +538,57 @@
         
         function openCategoryModal() { document.getElementById('modalOverlay').style.display = 'flex'; renderCatManager(); }
         function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; renderSidebar(); updateCategorySelectOptions(); }
+        
         function renderCatManager() {
             const list = document.getElementById('catManagerList'); list.innerHTML = '';
-            categories.forEach(c => {
+            
+            categories.filter(c=>!c.parentId).forEach(r => {
                 const row = document.createElement('div'); row.className = 'cat-row';
-                row.innerHTML = `<span>${c.name}</span> <button style="color:red; border:none; background:none;" onclick="delCat('${c.id}')">삭제</button>`;
+                row.innerHTML = `
+                    <strong>${r.name}</strong>
+                    <div class="cat-btn-group">
+                        <button class="btn-cat-action" onclick="addChildCat('${r.id}')">소분류</button>
+                        <button class="btn-cat-action" onclick="editCat('${r.id}')">수정</button>
+                        <button class="btn-cat-action" onclick="delCat('${r.id}')">삭제</button>
+                    </div>`;
                 list.appendChild(row);
+                
+                categories.filter(c=>c.parentId===r.id).forEach(ch => {
+                    const sub = document.createElement('div'); sub.className = 'cat-row'; sub.style.paddingLeft='20px';
+                    sub.innerHTML = `
+                        <span style="color:#666">└ ${ch.name}</span>
+                        <div class="cat-btn-group">
+                            <button class="btn-cat-action" onclick="editCat('${ch.id}')">수정</button>
+                            <button class="btn-cat-action" onclick="delCat('${ch.id}')">삭제</button>
+                        </div>`;
+                    list.appendChild(sub);
+                });
             });
         }
+
         function addRootCategory() {
             const name = document.getElementById('newCatName').value.trim();
-            if(name) { categories.push({id:'cat_'+Date.now(), name:name, parentId:null}); localStorage.setItem('myCategories', JSON.stringify(categories)); document.getElementById('newCatName').value=''; renderCatManager(); }
+            if(name) { categories.push({id:'cat_'+Date.now(), name:name, parentId:null}); saveCat(); document.getElementById('newCatName').value=''; }
+        }
+        function addChildCat(parentId) {
+            const name = prompt('소분류 이름:');
+            if(name) { categories.push({id:'cat_'+Date.now(), name:name, parentId:parentId}); saveCat(); }
+        }
+        function editCat(id) {
+            const cat = categories.find(c=>c.id===id);
+            const newName = prompt('수정할 이름:', cat.name);
+            if(newName) { cat.name = newName; saveCat(); }
         }
         function delCat(id) {
-            if(confirm('삭제?')) { categories = categories.filter(c=>c.id!==id); localStorage.setItem('myCategories', JSON.stringify(categories)); renderCatManager(); }
+            if(confirm('이 카테고리를 삭제할까요? (포함된 글은 미분류가 됩니다)')) {
+                // 자식 카테고리도 삭제
+                categories = categories.filter(c => c.id !== id && c.parentId !== id);
+                saveCat();
+            }
+        }
+        function saveCat() {
+            localStorage.setItem('myCategories', JSON.stringify(categories));
+            renderCatManager();
         }
     </script>
 </body>
